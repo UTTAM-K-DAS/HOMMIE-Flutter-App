@@ -1,0 +1,60 @@
+// URGENT: Add this temporary rule to allow initial admin creation
+// Add this to your Firebase Console rules temporarily
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // TEMPORARY: Allow anyone to create admin user initially
+    match /users/{userId} {
+      allow read, write: if true; // TEMPORARY - for admin setup only
+    }
+    
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return request.auth != null && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // All other collections - admin access required
+    match /providers/{providerId} {
+      allow read, write: if isAdmin();
+      allow read: if isAuthenticated();
+    }
+    
+    match /services/{serviceId} {
+      allow read, write: if isAdmin();
+      allow read: if isAuthenticated();
+    }
+    
+    match /service_categories/{categoryId} {
+      allow read, write: if isAdmin();
+      allow read: if isAuthenticated();
+    }
+    
+    match /categories/{categoryId} {
+      allow read, write: if isAdmin();
+      allow read: if isAuthenticated();
+    }
+    
+    match /bookings/{bookingId} {
+      allow read, write: if isAdmin();
+      allow read, create: if isAuthenticated();
+    }
+    
+    match /settings/{document} {
+      allow read, write: if isAdmin();
+      allow read: if isAuthenticated();
+    }
+    
+    // Catch-all for admin
+    match /{document=**} {
+      allow read, write: if isAdmin();
+    }
+  }
+}

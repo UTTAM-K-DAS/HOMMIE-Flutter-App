@@ -1,0 +1,63 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Users collection - users can read/write their own data, admins can access all
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      allow write: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      allow create: if isAuthenticated();
+    }
+    
+    // Bookings - users can manage their own bookings, admins can access all
+    match /bookings/{bookingId} {
+      allow read: if isAuthenticated() && 
+        (isAdmin() || resource.data.userId == request.auth.uid);
+      allow write: if isAuthenticated() && 
+        (isAdmin() || (resource == null || resource.data.userId == request.auth.uid));
+      allow create: if isAuthenticated();
+    }
+    
+    // Services - all authenticated users can read, only admins can write
+    match /services/{serviceId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+      allow create: if isAdmin();
+    }
+    
+    // Service providers - all authenticated users can read, admins and the provider can write
+    match /serviceProviders/{providerId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin() || (isAuthenticated() && request.auth.uid == providerId);
+      allow create: if isAdmin();
+    }
+    
+    // Reviews - users can read all reviews, write their own, admins can manage all
+    match /reviews/{reviewId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && 
+        (isAdmin() || (resource == null || resource.data.userId == request.auth.uid));
+      allow create: if isAuthenticated();
+    }
+    
+    // Notifications - users can read/write their own, admins can manage all
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() && 
+        (isAdmin() || resource.data.userId == request.auth.uid);
+      allow write: if isAuthenticated() && 
+        (isAdmin() || (resource == null || resource.data.userId == request.auth.uid));
+      allow create: if isAuthenticated();
+    }
+  }
+}

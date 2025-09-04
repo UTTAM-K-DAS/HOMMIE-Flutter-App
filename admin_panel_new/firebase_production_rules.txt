@@ -1,0 +1,121 @@
+HOMMIE FIREBASE PRODUCTION SECURITY RULES
+==========================================
+
+Copy the rules below and paste them in Firebase Console > Firestore Database > Rules:
+
+---BEGIN RULES---
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return request.auth != null && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      allow read, write: if isAdmin();
+      allow read, update: if isAuthenticated() && request.auth.uid == userId;
+      allow create: if isAuthenticated();
+      // Allow reading provider profiles for booking (main app needs this)
+      allow read: if isAuthenticated() && resource.data.get('role', '') == 'provider';
+    }
+    
+    // Providers collection (legacy - mainly for compatibility)
+    match /providers/{providerId} {
+      allow read, write: if isAdmin();
+      allow read: if isAuthenticated();
+    }
+    
+    // Services collection  
+    match /services/{serviceId} {
+      allow read, write: if isAdmin();
+      allow read: if isAuthenticated(); // Allow all authenticated users to read services
+    }
+    
+    // Service categories collection
+    match /service_categories/{categoryId} {
+      allow read, write: if isAdmin();
+      allow read: if isAuthenticated(); // Allow all authenticated users to read categories
+    }
+    
+    // Bookings collection
+    match /bookings/{bookingId} {
+      allow read, write: if isAdmin();
+      allow read, create: if isAuthenticated();
+      allow update: if isAuthenticated() && 
+                       (request.auth.uid == resource.data.customerId || 
+                        request.auth.uid == resource.data.providerId);
+    }
+    
+    // Settings collection
+    match /settings/{document} {
+      allow read, write: if isAdmin();
+      allow read: if isAuthenticated(); // Allow reading app settings
+    }
+    
+    // Analytics collection
+    match /analytics/{document} {
+      allow read, write: if isAdmin();
+    }
+    
+    // Allow reading public data for unauthenticated users (optional)
+    match /public/{document} {
+      allow read: if true;
+    }
+  }
+}
+
+---END RULES---
+
+COMPOSITE INDEXES REQUIRED:
+===========================
+
+Create these indexes in Firebase Console > Firestore Database > Indexes:
+
+1. Collection: users
+   Fields: role (Ascending), isActive (Ascending)
+   Query scope: Collection
+
+2. Collection: providers  
+   Fields: category (Ascending), isActive (Ascending)
+   Query scope: Collection
+
+3. Collection: services
+   Fields: category (Ascending), isAvailable (Ascending)
+   Query scope: Collection
+
+4. Collection: bookings
+   Fields: customerId (Ascending), createdAt (Descending)
+   Query scope: Collection
+
+5. Collection: bookings
+   Fields: providerId (Ascending), createdAt (Descending)  
+   Query scope: Collection
+
+6. Collection: bookings
+   Fields: status (Ascending), createdAt (Descending)
+   Query scope: Collection
+
+ADMIN CREDENTIALS:
+==================
+Email: admin@hommie.com
+Password: admin123456
+
+SETUP PROCESS:
+==============
+1. Deploy temporary rules (allow all access)
+2. Create admin account using Firebase Setup screen  
+3. Sign in as admin
+4. Create sample data
+5. Deploy production rules (role-based access)
+6. Create composite indexes
+7. Test all admin panel sections

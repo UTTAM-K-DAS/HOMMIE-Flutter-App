@@ -1,0 +1,67 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle with Gradient -->
+  <defs>
+    <linearGradient id="background" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="house" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f8f9ff;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="roof" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4f46e5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#6366f1;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background Circle -->
+  <circle cx="256" cy="256" r="240" fill="url(#background)" stroke="#ffffff" stroke-width="8"/>
+  
+  <!-- House Base -->
+  <rect x="150" y="220" width="212" height="160" rx="8" fill="url(#house)" stroke="#e5e7eb" stroke-width="2"/>
+  
+  <!-- House Roof -->
+  <path d="M130 220 L256 140 L382 220 Z" fill="url(#roof)" stroke="#4338ca" stroke-width="2"/>
+  
+  <!-- Door -->
+  <rect x="210" y="280" width="50" height="80" rx="4" fill="#6366f1" stroke="#4f46e5" stroke-width="2"/>
+  <circle cx="248" cy="315" r="3" fill="#ffffff"/>
+  
+  <!-- Windows -->
+  <rect x="170" y="250" width="30" height="25" rx="3" fill="#38bdf8" stroke="#0ea5e9" stroke-width="1"/>
+  <rect x="312" y="250" width="30" height="25" rx="3" fill="#38bdf8" stroke="#0ea5e9" stroke-width="1"/>
+  
+  <!-- Window Crosses -->
+  <line x1="185" y1="250" x2="185" y2="275" stroke="#0ea5e9" stroke-width="1"/>
+  <line x1="170" y1="262.5" x2="200" y2="262.5" stroke="#0ea5e9" stroke-width="1"/>
+  <line x1="327" y1="250" x2="327" y2="275" stroke="#0ea5e9" stroke-width="1"/>
+  <line x1="312" y1="262.5" x2="342" y2="262.5" stroke="#0ea5e9" stroke-width="1"/>
+  
+  <!-- Chimney -->
+  <rect x="300" y="160" width="20" height="40" fill="#ef4444" stroke="#dc2626" stroke-width="1"/>
+  
+  <!-- Service Tools (Wrench and Screwdriver) -->
+  <g transform="translate(180, 320)">
+    <!-- Wrench -->
+    <path d="M5 15 L15 5 L20 10 L10 20 Z" fill="#fbbf24" stroke="#f59e0b" stroke-width="1"/>
+    <circle cx="8" cy="12" r="2" fill="none" stroke="#f59e0b" stroke-width="1"/>
+  </g>
+  
+  <g transform="translate(300, 320)">
+    <!-- Screwdriver -->
+    <rect x="0" y="0" width="3" height="20" rx="1" fill="#34d399" stroke="#10b981" stroke-width="1"/>
+    <rect x="-2" y="18" width="7" height="4" rx="1" fill="#f59e0b" stroke="#f97316" stroke-width="1"/>
+  </g>
+  
+  <!-- Sparkles for "magic" service -->
+  <g fill="#fbbf24">
+    <circle cx="120" cy="180" r="3" opacity="0.8"/>
+    <circle cx="400" cy="200" r="2" opacity="0.6"/>
+    <circle cx="380" cy="300" r="2.5" opacity="0.7"/>
+    <circle cx="140" cy="320" r="2" opacity="0.5"/>
+  </g>
+  
+  <!-- HOMMIE Text (subtle) -->
+  <text x="256" y="420" font-family="Arial, sans-serif" font-size="24" font-weight="bold" text-anchor="middle" fill="#ffffff" opacity="0.9">HOMMIE</text>
+</svg>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <base href="/" />
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-analytics.js"></script>
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyDIiKMBKKOjzfcEyKYV8RVfu8Qx3ITR1jg",
+        authDomain: "hommie-ea778.firebaseapp.com",
+        projectId: "hommie-ea778",
+        storageBucket: "hommie-ea778.firebasestorage.app",
+        messagingSenderId: "808565191689",
+        appId: "1:808565191689:web:55f1b50cf69bb0b7d334d8",
+        measurementId: "G-MQLW2BQVMB"
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+    </script>
+
+    <meta charset="UTF-8" />
+    <meta content="IE=edge" http-equiv="X-UA-Compatible" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Book home services like cleaning, plumbing, and electrical repairs easily with our Flutter Home Service App." />
+    <meta name="theme-color" content="#00796B" />
+    
+    <!-- Google Sign-In -->
+    <meta name="google-signin-client_id" content="808565191689-YOUR_CLIENT_ID_HERE.apps.googleusercontent.com" />
+
+    <!-- iOS support -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Home Service App" />
+    <link rel="apple-touch-icon" href="icons/Icon-192.png" />
+
+    <!-- App Manifest -->
+    <link rel="manifest" href="manifest.json" />
+
+    <title>Home Service App</title>
+
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: 'Segoe UI', Roboto, sans-serif;
+        background-color: #f5f5f5;
+        color: #333;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      #loading-text {
+        font-size: 20px;
+        color: #00796B;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="loading-text">Loading Home Service App...</div>
+
+    <script>
+      const serviceWorkerVersion = '{{flutter_service_worker_version}}';
+      var scriptLoaded = false;
+
+      function loadMainDartJs() {
+        if (scriptLoaded) return;
+        scriptLoaded = true;
+
+        const scriptTag = document.createElement('script');
+        scriptTag.src = 'main.dart.js';
+        scriptTag.type = 'application/javascript';
+        document.body.appendChild(scriptTag);
+
+        const loadingText = document.getElementById('loading-text');
+        if (loadingText) loadingText.remove();
+      }
+
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          const serviceWorkerUrl = 'flutter_service_worker.js?v=' + serviceWorkerVersion;
+
+          navigator.serviceWorker
+            .register(serviceWorkerUrl)
+            .then((reg) => {
+              function waitForActivation(serviceWorker) {
+                serviceWorker.addEventListener('statechange', () => {
+                  if (serviceWorker.state === 'activated') {
+                    console.log('Service worker activated.');
+                    loadMainDartJs();
+                  }
+                });
+              }
+
+              if (!reg.active && (reg.installing || reg.waiting)) {
+                waitForActivation(reg.installing ?? reg.waiting);
+              } else if (!reg.active.scriptURL.endsWith(serviceWorkerVersion)) {
+                console.log('New service worker available.');
+                reg.update();
+                waitForActivation(reg.installing);
+              } else {
+                console.log('Using existing service worker.');
+                loadMainDartJs();
+              }
+            })
+            .catch((err) => {
+              console.warn('Service worker registration failed. Loading main.dart.js directly.', err);
+              loadMainDartJs();
+            });
+
+          setTimeout(() => {
+            if (!scriptLoaded) {
+              console.warn('Service worker timeout. Loading main.dart.js directly.');
+              loadMainDartJs();
+            }
+          }, 4000);
+        });
+      } else {
+        console.log('Service workers not supported. Loading main.dart.js directly.');
+        loadMainDartJs();
+      }
+    </script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-messaging-compat.js"></script>
+    
+    <script>
+      window.flutterWebRenderer = "html";
+    </script>
+    <script src="main.dart.js" type="application/javascript"></script>
+  </body>
+</html>

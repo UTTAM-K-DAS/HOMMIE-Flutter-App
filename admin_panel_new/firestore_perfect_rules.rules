@@ -1,0 +1,204 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return request.auth != null && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if user is provider
+    function isProvider() {
+      return request.auth != null &&
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'provider';
+    }
+    
+    // Helper function to check if user is customer
+    function isCustomer() {
+      return request.auth != null &&
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'customer';
+    }
+    
+    // Users collection - Core user management
+    match /users/{userId} {
+      // Admin can read/write all users
+      allow read, write: if isAdmin();
+      
+      // Users can read/update their own profile
+      allow read, update: if isAuthenticated() && request.auth.uid == userId;
+      
+      // Allow user creation during registration
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      
+      // Allow reading provider profiles for booking functionality
+      allow read: if isAuthenticated() && resource.data.get('role', '') == 'provider';
+      
+      // Allow reading customer profiles for provider communication
+      allow read: if isProvider() && resource.data.get('role', '') == 'customer';
+    }
+    
+    // Legacy providers collection (for backward compatibility)
+    match /providers/{providerId} {
+      // Admin full access
+      allow read, write: if isAdmin();
+      
+      // Providers can manage their own profile
+      allow read, update: if isAuthenticated() && request.auth.uid == providerId;
+      
+      // Customers can read provider profiles
+      allow read: if isAuthenticated();
+    }
+    
+    // Services collection - Service catalog management
+    match /services/{serviceId} {
+      // Admin full access for service management
+      allow read, write: if isAdmin();
+      
+      // All authenticated users can read services
+      allow read: if isAuthenticated();
+      
+      // Providers can create services (if needed)
+      allow create: if isProvider();
+    }
+    
+    // Service categories collection - Category management
+    match /service_categories/{categoryId} {
+      // Admin full access for category management
+      allow read, write: if isAdmin();
+      
+      // All authenticated users can read categories
+      allow read: if isAuthenticated();
+    }
+    
+    // Categories collection (alternative naming)
+    match /categories/{categoryId} {
+      // Admin full access
+      allow read, write: if isAdmin();
+      
+      // All authenticated users can read categories
+      allow read: if isAuthenticated();
+    }
+    
+    // Bookings collection - Booking management
+    match /bookings/{bookingId} {
+      // Admin full access for booking management
+      allow read, write: if isAdmin();
+      
+      // Authenticated users can read and create bookings
+      allow read, create: if isAuthenticated();
+      
+      // Users can update bookings they're involved in
+      allow update: if isAuthenticated() && 
+                       (request.auth.uid == resource.data.customerId || 
+                        request.auth.uid == resource.data.providerId);
+                        
+      // Allow deletion for admin and involved parties
+      allow delete: if isAdmin() || 
+                       (isAuthenticated() && request.auth.uid == resource.data.customerId);
+    }
+    
+    // Reviews collection - Review system
+    match /reviews/{reviewId} {
+      // Admin full access
+      allow read, write: if isAdmin();
+      
+      // All users can read reviews
+      allow read: if isAuthenticated();
+      
+      // Customers can create reviews for their bookings
+      allow create: if isCustomer();
+      
+      // Users can update their own reviews
+      allow update: if isAuthenticated() && request.auth.uid == resource.data.customerId;
+    }
+    
+    // Settings collection - App configuration
+    match /settings/{document} {
+      // Admin full access for configuration
+      allow read, write: if isAdmin();
+      
+      // All authenticated users can read app settings
+      allow read: if isAuthenticated();
+    }
+    
+    // Analytics collection - Admin analytics
+    match /analytics/{document} {
+      // Only admin access for analytics
+      allow read, write: if isAdmin();
+    }
+    
+    // Admin logs collection - System logging
+    match /admin_logs/{logId} {
+      // Only admin access for logs
+      allow read, write: if isAdmin();
+    }
+    
+    // Notifications collection - User notifications
+    match /notifications/{notificationId} {
+      // Admin full access
+      allow read, write: if isAdmin();
+      
+      // Users can read their own notifications
+      allow read: if isAuthenticated() && request.auth.uid == resource.data.userId;
+      
+      // Users can update their notification status (mark as read)
+      allow update: if isAuthenticated() && request.auth.uid == resource.data.userId;
+      
+      // System can create notifications
+      allow create: if isAuthenticated();
+    }
+    
+    // Chat/Messages collection - Communication system
+    match /messages/{messageId} {
+      // Admin full access
+      allow read, write: if isAdmin();
+      
+      // Users involved in conversation can read/write
+      allow read, write: if isAuthenticated() && 
+                            (request.auth.uid == resource.data.senderId || 
+                             request.auth.uid == resource.data.receiverId);
+    }
+    
+    // Conversations collection - Chat conversations
+    match /conversations/{conversationId} {
+      // Admin full access
+      allow read, write: if isAdmin();
+      
+      // Participants can read/write conversations
+      allow read, write: if isAuthenticated() && 
+                            request.auth.uid in resource.data.participants;
+    }
+    
+    // Public data collection - Publicly accessible data
+    match /public/{document} {
+      // Anyone can read public data
+      allow read: if true;
+      
+      // Only admin can write public data
+      allow write: if isAdmin();
+    }
+    
+    // App metadata collection - System metadata
+    match /metadata/{document} {
+      // Admin full access
+      allow read, write: if isAdmin();
+      
+      // Authenticated users can read metadata
+      allow read: if isAuthenticated();
+    }
+    
+    // Catch-all for any other collections
+    match /{document=**} {
+      // Admin has access to everything
+      allow read, write: if isAdmin();
+    }
+  }
+}

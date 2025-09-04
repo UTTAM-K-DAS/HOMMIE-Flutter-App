@@ -1,0 +1,129 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    function isProvider() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'provider';
+    }
+    
+    function isCustomer() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'customer';
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Users collection - for authentication and role management
+    match /users/{userId} {
+      // Allow users to read/write their own data
+      allow read, write: if isOwner(userId);
+      // Allow admins to read/write all user data
+      allow read, write: if isAdmin();
+      // Allow providers to read their own data
+      allow read: if isProvider() && isOwner(userId);
+      // Allow customers to read their own data
+      allow read: if isCustomer() && isOwner(userId);
+    }
+
+    // Providers collection - for service provider profiles
+    match /providers/{providerId} {
+      // Allow authenticated users to read provider profiles (for booking)
+      allow read: if isAuthenticated();
+      // Only admins can create, update, delete providers
+      allow create, update, delete: if isAdmin();
+      // Providers can update their own profile
+      allow update: if isProvider() && isOwner(providerId);
+    }
+
+    // Services collection - for available services
+    match /services/{serviceId} {
+      // Allow authenticated users to read services (for booking)
+      allow read: if isAuthenticated();
+      // Only admins can manage services
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Bookings collection - for service bookings
+    match /bookings/{bookingId} {
+      // Allow customers to read/create their own bookings
+      allow read, create: if isCustomer() && 
+                         (resource == null || resource.data.customerId == request.auth.uid);
+      // Allow customers to update their own bookings (limited fields)
+      allow update: if isCustomer() && 
+                   resource.data.customerId == request.auth.uid &&
+                   request.data.diff(resource.data).affectedKeys().hasOnly(['status', 'notes']);
+      
+      // Allow providers to read/update bookings assigned to them
+      allow read, update: if isProvider() && 
+                         resource.data.providerId == request.auth.uid;
+      
+      // Allow admins full access to all bookings
+      allow read, write: if isAdmin();
+    }
+
+    // Categories collection - for service categories
+    match /categories/{categoryId} {
+      // Allow all authenticated users to read categories
+      allow read: if isAuthenticated();
+      // Only admins can manage categories
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Reviews collection - for service reviews
+    match /reviews/{reviewId} {
+      // Allow authenticated users to read reviews
+      allow read: if isAuthenticated();
+      // Allow customers to create reviews for their completed bookings
+      allow create: if isCustomer() && request.data.customerId == request.auth.uid;
+      // Allow customers to update their own reviews
+      allow update: if isCustomer() && resource.data.customerId == request.auth.uid;
+      // Allow admins full access
+      allow read, write: if isAdmin();
+    }
+
+    // Admin logs collection - for audit trails
+    match /admin_logs/{logId} {
+      // Only admins can read/write logs
+      allow read, write: if isAdmin();
+    }
+
+    // Settings collection - for app settings
+    match /settings/{settingId} {
+      // Allow authenticated users to read settings
+      allow read: if isAuthenticated();
+      // Only admins can update settings
+      allow write: if isAdmin();
+    }
+
+    // Notifications collection
+    match /notifications/{notificationId} {
+      // Users can read their own notifications
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      // Admins can create notifications for any user
+      allow create: if isAdmin();
+      // Users can update their own notifications (mark as read)
+      allow update: if isAuthenticated() && 
+                   resource.data.userId == request.auth.uid &&
+                   request.data.diff(resource.data).affectedKeys().hasOnly(['isRead', 'readAt']);
+      // Admins have full access
+      allow read, write: if isAdmin();
+    }
+
+    // Default deny rule
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
