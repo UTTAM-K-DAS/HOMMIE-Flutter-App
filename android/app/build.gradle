@@ -3,9 +3,8 @@ plugins {
     // START: FlutterFire Configuration
     id 'com.google.gms.google-services'
     // END: FlutterFire Configuration
+    id 'dev.flutter.flutter-gradle-plugin'
 }
-
-apply plugin: 'dev.flutter.flutter-gradle-plugin'
 
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
