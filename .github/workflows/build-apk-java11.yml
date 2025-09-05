@@ -19,7 +19,7 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.13.9'
+        flutter-version: '3.16.9'
         channel: 'stable'
     
     - name: Create dummy google-services.json
@@ -73,6 +73,8 @@ jobs:
     - name: Debug Gradle Configuration
       run: |
         cd android
+        echo "=== Making gradlew executable ==="
+        chmod +x gradlew
         echo "=== Gradle Wrapper Version ==="
         ./gradlew --version
         echo "=== Available Gradle Tasks ==="
@@ -85,6 +87,7 @@ jobs:
       if: failure()
       run: |
         cd android
+        chmod +x gradlew
         ./gradlew assembleDebug --stacktrace --info
     
     - name: Upload APK
