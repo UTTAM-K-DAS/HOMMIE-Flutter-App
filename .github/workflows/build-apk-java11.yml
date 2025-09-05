@@ -56,11 +56,36 @@ jobs:
         }
         EOF
     
+    - name: Debug Environment
+      run: |
+        echo "=== Java Version ==="
+        java -version
+        echo "=== Flutter Version ==="
+        flutter --version
+        echo "=== Flutter Doctor ==="
+        flutter doctor -v
+        echo "=== Android SDK ==="
+        flutter doctor --android-licenses || true
+    
     - name: Install dependencies
       run: flutter pub get
     
-    - name: Build APK
-      run: flutter build apk --debug
+    - name: Debug Gradle Configuration
+      run: |
+        cd android
+        echo "=== Gradle Wrapper Version ==="
+        ./gradlew --version
+        echo "=== Available Gradle Tasks ==="
+        ./gradlew tasks --stacktrace
+    
+    - name: Build APK with detailed logs
+      run: flutter build apk --debug --verbose
+    
+    - name: Fallback - Direct Gradle Build with stacktrace
+      if: failure()
+      run: |
+        cd android
+        ./gradlew assembleDebug --stacktrace --info
     
     - name: Upload APK
       uses: actions/upload-artifact@v4
