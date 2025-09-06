@@ -62,40 +62,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.light(
           primary: const Color(0xFF667eea),
           secondary: const Color(0xFF764ba2),
-        ),PS C:\Users\User\HOMMIE> $env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr" ; cd "C:\Users\User\HOMMIE\android" ; .\gradlew.bat assembleDebug
-Configuration on demand is an incubating feature.
-
-> Configure project :app
-WARNING: The option 'android.enableR8' is deprecated.
-It was removed in version 7.0 of the Android Gradle plugin.
-Please remove it from `gradle.properties`.
-
-FAILURE: Build failed with an exception.
-
-* Where:
-Build file 'C:\Users\User\HOMMIE\android\app\build.gradle' line: 3
-
-* What went wrong:
-An exception occurred applying plugin request [id: 'org.jetbrains.kotlin.android', version: '1.8.22']
-> Failed to apply plugin 'org.jetbrains.kotlin.android'.
-   > Could not create an instance of type org.jetbrains.kotlin.gradle.plugin.mpp.KotlinAndroidTarget.
-      > Could not generate a decorated class for type KotlinAndroidTarget.
-         > com/android/build/gradle/api/BaseVariant
-
-* Try:
-> Run with --stacktrace option to get the stack trace.
-> Run with --info or --debug option to get more log output.
-> Run with --scan to get full insights.
-> Get more help at https://help.gradle.org.
-
-Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
-
-You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
-
-For more on this, please refer to https://docs.gradle.org/8.9/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
-
-BUILD FAILED in 27s
-5 actionable tasks: 1 executed, 4 up-to-date
+        ),
         appBarTheme: const AppBarTheme(
           elevation: 0,
           backgroundColor: Colors.transparent,
